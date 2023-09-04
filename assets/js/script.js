@@ -23,7 +23,7 @@ const songs = [
     album: "Audio",
     year: 2023,
     artist: "Rema ft Gomez",
-    musicPath: "./assets/music/local-music-2.mp3",
+    musicPath: "https://cdn.tunezjam.com/video/Rema-Ft-Selena-Gomez-Calm-Down-Video-(TunezJam.com).mp4",
   },
   {
     id:2,
@@ -33,7 +33,7 @@ const songs = [
     album: "Audio",
     year: 2023,
     artist: "Asake",
-    musicPath: "./assets/music/local-music-1.mp3",
+    musicPath: "https://cdn.trendybeatz.com/audio/Asake-Lonely-At-The-Top-(TrendyBeatz.com).mp3",
   },
   {
     id:3,
@@ -43,7 +43,7 @@ const songs = [
     album: "Audio",
     year: 2023,
     artist: "Davido ft Musa",
-    musicPath: "./assets/music/local-music-3.mp3",
+    musicPath: "https://cdn.trendybeatz.com/audio/Davido-Ft-Musa-Keys-Unavailable-New-Song-(TrendyBeatz.com).mp3",
   }
 ];
 
