@@ -1,6 +1,6 @@
 'use strict'
 
-const {$render, $trigger, $select, stringify} = render;
+const {$render, $trigger, $select, $purify, stringify} = render;
 
 let playerSeekRange;
 let playerDuration;
