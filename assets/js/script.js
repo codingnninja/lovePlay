@@ -1,5 +1,7 @@
 'use strict'
 
+const {$render, $trigger, $select, stringify} = render;
+
 let playerSeekRange;
 let playerDuration;
 let playingAudio;
