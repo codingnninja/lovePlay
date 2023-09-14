@@ -1,5 +1,7 @@
 'use strict'
 
+const {$render, stringify, $select, $trigger, $purify} = render;
+
 let playerSeekRange;
 let playerDuration;
 let playingAudio;
@@ -18,7 +20,7 @@ const songs = [
   {
     id:1,
     backgroundImage: "./assets/images/local-poster-1.jpg",
-    posterUrl: "./assets/images/local-poster-1.png",
+    posterUrl: "./assets/images/calm-down.png",
     title: "Calm Down",
     album: "Audio",
     year: 2023,
@@ -28,7 +30,7 @@ const songs = [
   {
     id:2,
     backgroundImage: "assets/images/local-poster-2.jpg",
-    posterUrl: "assets/images/local-poster-2.jpg",
+    posterUrl: "assets/images/lonely-at-the-top.jpg",
     title: "Lonely at the top ",
     album: "Audio",
     year: 2023,
@@ -38,7 +40,7 @@ const songs = [
   {
     id:3,
     backgroundImage: "./assets/images/local-poster-3.jpg",
-    posterUrl: "./assets/images/local-poster-3.jpg",
+    posterUrl: "./assets/images/unavailable.jpg",
     title: "Unavailable",
     album: "Audio",
     year: 2023,
@@ -56,14 +58,14 @@ const Player = () => {
 }
 const Playlist = () => {
   return `
-      <div class="playlist" data-playlist id="playlist">
+      <div class="playlist" id="playlist">
         <Songs mySongs=${stringify(songs)}/>
       </div>
   `;
 }
 const Overlay = () => {
   return `
-      <div class="overlay" data-playlist-toggler data-overlay></div>
+      <div class="overlay" onclick="$trigger(${toggle})">x</div>
   `;
 }
 const CurrentSong = (currentSong) => {
@@ -91,7 +93,7 @@ const updateDuration = (elements) => {
 
 const CurrentSongInformation = (song) => {
   return `
-    <audio src=${song.musicPath} id="audio-${song.id}" data-id="${song.id}" onEnded="autopilotMode(this, '${stringify(song)}')" onloadeddata="$trigger(${updateDuration}, '#audio-${song.id},#seek-${song.id}, #duration')"></audio>
+    <audio src=${song.musicPath} id="audio-${song.id}" data-id="${song.id}" onEnded="autopilotMode(this, '${stringify(song)}')" onloadeddata="$trigger(${updateDuration}, '#audio-${song.id},#seek-${song.id}, #duration')" class="playing-audio"></audio>
     <figure class="music-banner">
     <img
       src="${song.posterUrl}"
@@ -99,21 +101,20 @@ const CurrentSongInformation = (song) => {
       height="800"
       alt="Wotakoi: Love is Hard for an Otaku Album Poster"
       class="img-cover"
-      data-player-banner
     />
   </figure>
 
   <div class="music-content">
-    <h2 class="headline-sm" data-title>
+    <h2 class="headline-sm">
       ${song.title}
     </h2>
 
     <p class="label-lg label-wrapper wrapper">
-      <span data-album>${song.album}</span>
-      <span data-year>${song.year}</span>
+      <span>${song.album}</span>
+      <span>${song.year}</span>
     </p>
 
-    <p class="label-md artist" data-artist>${song.artist}</p>
+    <p class="label-md artist">${song.artist}</p>
     <SeekControl song=${stringify(song)} />
     <Controller song=${stringify(song)} />
   </div>
@@ -121,7 +122,6 @@ const CurrentSongInformation = (song) => {
 }
 
 const SeekControl = (song) => {
-  console.log(song)
   return `
     <div class="seek-control">
       <ProgressIndicator song=${stringify(song)} />
@@ -157,7 +157,7 @@ const Volume = (song) => {
   const volume = song.volume ? song.volume : 1;
   return `
     <div class="volume" id="volume">
-      <button class="btn-icon volume-btn" data-volume-btn>
+      <button class="btn-icon volume-btn">
         <span class="material-symbols-rounded" id="volume-icon">volume_up</span>
       </button>
 
@@ -170,8 +170,6 @@ const Volume = (song) => {
           class="range"
           id="volume-${song.id}"
           onchange="$trigger(${changeVolume}, '#audio-${song.id}, #volume-${song.id}, #volume-icon')"
-          data-range
-          data-seek
         />
 
         <div class="range-fill"></div>
@@ -204,8 +202,6 @@ const ProgressIndicator = (song) => {
           max="60"
           value="0"
           class="range"
-          data-range
-          data-seek
           id="seek-${song.id}"
           onchange="$trigger(${seek}, '#audio-${song.id},#running-time, #seek-${song.id}, #range-fill')"
         />
@@ -230,7 +226,6 @@ const playSelectedSong = (element, index) => {
   $render(Repeat)
 }
 const getSong = (index) => {
-  console.log(index);
   let nextSong;
   if(appState.shuffle && appState.selected === false){
     nextSong = getRandomSong();
@@ -250,7 +245,8 @@ const getSong = (index) => {
 }
 
 const setPlayingState = (song) => {
-  return songs.map(mySong => {
+  getSelectedSongsForDownload();
+  return songs.map((mySong, index) => { 
     if(mySong.id === song.id){
       mySong.isPlaying = true;
     } else {
@@ -265,8 +261,6 @@ const setToPlaying = (song) => {
     return
   }
   song.isPlaying = true;
-  const songList = setPlayingState(song);
-  $render(Songs, songList);
   $trigger(play, `#audio-${song.id}`, song);
 }
 
@@ -280,11 +274,13 @@ const previous = (element, previousIndex) => {
 const Previous = (song) => {
   const index = song.id - 1;
   return `
-    <button class="btn-icon" data-skip-prev>
-      <span class="material-symbols-rounded"
-        onclick="$trigger(${previous}, '#audio-${song.id}', ${index - 1})"
-      >skip_previous</span>
-    </button>
+    <div id="previous" data-index="${index - 1}">
+      <button class="btn-icon">
+        <span class="material-symbols-rounded"
+          onclick="$trigger(${previous}, '#audio-${song.id}', ${index - 1})"
+        >skip_previous</span>
+      </button>
+    </div>
   `;
 }
 
@@ -332,7 +328,7 @@ const next = (element, nextIndex) => {
 const Next = (song) => {
   const index = song.id - 1;
   return `
-    <div id="next">
+    <div id="next" data-index="${index + 1}">
       <button class="btn-icon">
         <span 
           class="material-symbols-rounded"
@@ -402,9 +398,18 @@ const Controller = (song) => {
     `;
 }
 
+const unCheckSong = (song) => {
+  console.log(song.checked);
+  if(song.checked === false){
+    song.checked = false;
+    return;
+  }
+}
 const Audio = (song) => {
+  const songId = song.id;
   return `
     <div id="${song.id}">
+      <input type="checkbox" name="select-song" id="check-${songId}"     class="selected-songs" ${ song.isChecked ? 'checked' : ''}>
       <button 
         class="music-item ${song.isPlaying ? 'playing' : ''}"
         id='playing-${song.id}' 
@@ -414,20 +419,100 @@ const Audio = (song) => {
           <div class="item-icon">
             <span class="material-symbols-rounded">equalizer</span>
           </div>
+          <div class="song-details">
+          <span id="title">${song.title}</span>
+            <span id="date">August (2023)</span>
+          </div>
       </button>
     </div>
   `;
+}
+
+const getSelectedSongsForDownload = () => {
+  const selectedSongsIDs = $select('.selected-songs');
+  const selectedSongs = songs.map((song, index) => {
+    if(selectedSongsIDs[index].checked === true){
+      song.isChecked = true;
+      return song;
+    }
+    song.isChecked = false;
+    return song;
+  });
+  return selectedSongs;
+}
+
+const downloadAll = () => {
+  const selectedSongs = getSelectedSongsForDownload();
+  const [errorMsg] = $select('#selection-error');
+
+  if(selectedSongs.length === 0){
+    errorMsg.classList.add('show');
+    return;
+  } else {
+    errorMsg.classList.remove('show');
+  }
+
+  let depth = 0;
+  while(selectedSongs.length > depth){
+    const selectedSong = selectedSongs[depth];
+    if(!selectedSong.isChecked){
+      continue;
+    }
+    const link = document.createElement("a");
+    link.href = selectedSong.musicPath;
+    link.download = `${selectedSong.musicPath}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    depth++;
+  }
+  location.reload();
 }
 const Songs = (mySongs) => {
   const songList = mySongs.map((song) =>`<Audio song=${stringify(song)} />`);
   return `
     <div class="music-list" id="music-list">
+      <div 
+        style="border: 1px solid silver; text-align:center; border-radius: 8px"
+        onclick="$trigger(downloadAll)"
+      >
+        <span class="material-symbols-rounded active">download</span> all
+      </div>
+        <span id="selection-error">No song selected</span>
       ${songList}
     </div>`;
+}
+
+const toggle = () => {
+  const [playlist, overlay] = $select('#playlist, .overlay');
+  if(playlist.classList.contains('active')){
+    playlist.classList.remove('active');
+    overlay.classList.remove('active');
+  } else {
+    playlist.classList.add('active');
+    overlay.classList.add('active');
+  }
+};
+const Header = () => {
+  return `
+    <div class="top-bar wrapper">
+      <!--Crunchyroll navbar-->
+      <div class="logo wrapper">
+        <h1 class="title-lg">LovePlay</h1>
+      </div>
+      <!--Que music list-->
+      <div class="top-bar-actions">
+        <button class="btn-icon" onclick="$trigger(toggle)">
+          <span class="material-symbols-rounded">filter_list</span>
+        </button>
+      </div>
+    </div>
+  `;
 }
 const App = () => {
   return `
     <div id="main">
+      <Header />
       <article>
           <Player />
           <Playlist />
@@ -439,4 +524,112 @@ const App = () => {
 
 $render(App);
 
-//TODO: update $trigger, add purify to single render prop
+let [touchArea, overlay, playBtn] = $select("#player, #overlay, #play>button");
+const debounce = (func, timeout=300) => {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(()=> {func.apply(this, args)}, timer);
+  }
+}
+
+const handlePrevious = debounce(() => {
+  let [previousComponent] = $select("#previous");
+  const previousSongIndex = previousComponent.dataset.index;
+  const currentSong = $select(`#audio-${previousSongIndex + 1}`);
+  previous(currentSong, previousSongIndex);
+});
+const handleNext = debounce (() => {
+  let [nextComponent] = $select("#next");
+  const nextSongIndex = nextComponent.dataset.index;
+  const currentSong = $select(`#audio-${nextSongIndex - 1}`);
+  next(currentSong, nextSongIndex);
+});
+//Initial mouse X and Y positions are 0
+
+let mouseX,
+  initialX = 0;
+let mouseY,
+  initialY = 0;
+let isSwiped;
+
+//Events for touch and mouse
+let events = {
+  mouse: {
+    down: "mousedown",
+    move: "mousemove",
+    up: "mouseup",
+  },
+  touch: {
+    down: "touchstart",
+    move: "touchmove",
+    up: "touchend",
+  },
+};
+
+let deviceType = "";
+
+//Detect touch device
+
+const isTouchDevice = () => {
+  try {
+    //We try to create TouchEvent (it would fail for desktops and throw error)
+    document.createEvent("TouchEvent");
+    deviceType = "touch";
+    return true;
+  } catch (e) {
+    deviceType = "mouse";
+    return false;
+  }
+};
+
+//Get left and top of touchArea
+let rectLeft = touchArea.getBoundingClientRect().left;
+let rectTop = touchArea.getBoundingClientRect().top;
+
+//Get Exact X and Y position of mouse/touch
+const getXY = (e) => {
+  mouseX = (!isTouchDevice() ? e.pageX : e.touches[0].pageX) - rectLeft;
+  mouseY = (!isTouchDevice() ? e.pageY : e.touches[0].pageY) - rectTop;
+};
+
+isTouchDevice();
+
+//Start Swipe
+touchArea.addEventListener(events[deviceType].down, (event) => {
+  isSwiped = true;
+  //Get X and Y Position
+  getXY(event);
+  initialX = mouseX;
+  initialY = mouseY;
+});
+
+//Mousemove / touchmove
+touchArea.addEventListener(events[deviceType].move, (event) => {
+  if (!isTouchDevice()) {
+    event.preventDefault();
+  }
+  if (isSwiped) {
+    getXY(event);
+    let diffX = mouseX - initialX;
+    let diffY = mouseY - initialY;
+    if (Math.abs(diffY) > Math.abs(diffX)) {
+      diffY > 0 ? toggle() : toggle();
+    } else {
+      diffX > 0 ? handlePrevious()  : handleNext();
+    }
+  }
+});
+
+//Stop Drawing
+touchArea.addEventListener(events[deviceType].up, () => {
+  isSwiped = false;
+});
+
+touchArea.addEventListener("mouseleave", () => {
+  isSwiped = false;
+});
+
+window.onload = () => {
+  isSwiped = false;
+};
