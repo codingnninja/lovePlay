@@ -455,6 +455,7 @@ body:hover::-webkit-scrollbar-thumb { background-color: var(--surface-variant); 
 }
 
 .overlay {
+  display: flex;
   position: fixed;
   top: 0;
   left: 0;
@@ -465,6 +466,8 @@ body:hover::-webkit-scrollbar-thumb { background-color: var(--surface-variant); 
   pointer-events: none;
   transition: var(--transition-2);
   z-index: 3;
+  align-items: center;
+  justify-content: center;
 }
 
 .overlay.active {
@@ -472,7 +475,14 @@ body:hover::-webkit-scrollbar-thumb { background-color: var(--surface-variant); 
   opacity: 0.5;
 }
 
-
+.close {
+  width: 30px;
+  font-size: var(--headline-sm);
+  color: var(--white);
+  background: red;
+  border-radius: var(--radius-circle);
+  text-align: center;
+}
 /*-----------------------------------*\
 #MEDIA QUERIES
 \*-----------------------------------*/
@@ -585,7 +595,7 @@ body:hover::-webkit-scrollbar-thumb { background-color: var(--surface-variant); 
     height: 100%;
   }
 
-  .music-banner {
+  .music-banner, .container {
     aspect-ratio: unset;
     max-width: max-content;
     width: 100%;

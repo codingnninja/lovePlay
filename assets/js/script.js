@@ -15,40 +15,6 @@ const appState = {
   volume: null
 }
 
-/**All music information */
-const songs = [
-  {
-    id:1,
-    backgroundImage: "./assets/images/local-poster-1.jpg",
-    posterUrl: "./assets/images/calm-down.png",
-    title: "Calm Down",
-    album: "Audio",
-    year: 2023,
-    artist: "Rema ft Gomez",
-    musicPath: "https://cdn.tunezjam.com/video/Rema-Ft-Selena-Gomez-Calm-Down-Video-(TunezJam.com).mp4",
-  },
-  {
-    id:2,
-    backgroundImage: "assets/images/local-poster-2.jpg",
-    posterUrl: "assets/images/lonely-at-the-top.jpg",
-    title: "Lonely at the top ",
-    album: "Audio",
-    year: 2023,
-    artist: "Asake",
-    musicPath: "https://cdn.trendybeatz.com/audio/Asake-Lonely-At-The-Top-(TrendyBeatz.com).mp3",
-  },
-  {
-    id:3,
-    backgroundImage: "./assets/images/local-poster-3.jpg",
-    posterUrl: "./assets/images/unavailable.jpg",
-    title: "Unavailable",
-    album: "Audio",
-    year: 2023,
-    artist: "Davido ft Musa",
-    musicPath: "https://cdn.trendybeatz.com/audio/Davido-Ft-Musa-Keys-Unavailable-New-Song-(TrendyBeatz.com).mp3",
-  }
-];
-
 const Player = () => {
   return `
       <div class="player" id="player">
@@ -65,7 +31,9 @@ const Playlist = () => {
 }
 const Overlay = () => {
   return `
-      <div class="overlay" onclick="$trigger(${toggle})">x</div>
+      <div class="overlay" onclick="$trigger(${toggle})">
+        <span class="close">x</span>
+      </div>
   `;
 }
 const CurrentSong = (currentSong) => {
@@ -421,7 +389,7 @@ const Audio = (song) => {
           </div>
           <div class="song-details">
           <span id="title">${song.title}</span>
-            <span id="date">August (2023)</span>
+            <span id="date">${song.month} (${song.year})</span>
           </div>
       </button>
     </div>
@@ -466,7 +434,6 @@ const downloadAll = () => {
     document.body.removeChild(link);
     depth++;
   }
-  location.reload();
 }
 const Songs = (mySongs) => {
   const songList = mySongs.map((song) =>`<Audio song=${stringify(song)} />`);
@@ -483,7 +450,8 @@ const Songs = (mySongs) => {
     </div>`;
 }
 
-const toggle = () => {
+const toggle = (event) => {
+  event && event.preventDefault();
   const [playlist, overlay] = $select('#playlist, .overlay');
   if(playlist.classList.contains('active')){
     playlist.classList.remove('active');
@@ -524,7 +492,8 @@ const App = () => {
 
 $render(App);
 
-let [touchArea, overlay, playBtn] = $select("#player, #overlay, #play>button");
+// Swiping implementation
+let [touchArea, overlay] = $select("#player, #overlay");
 const debounce = (func, timeout=300) => {
   let timer;
   return (...args) => {
@@ -539,6 +508,7 @@ const handlePrevious = debounce(() => {
   const currentSong = $select(`#audio-${previousSongIndex + 1}`);
   previous(currentSong, previousSongIndex);
 });
+
 const handleNext = debounce (() => {
   let [nextComponent] = $select("#next");
   const nextSongIndex = nextComponent.dataset.index;
@@ -614,8 +584,11 @@ touchArea.addEventListener(events[deviceType].move, (event) => {
     let diffX = mouseX - initialX;
     let diffY = mouseY - initialY;
     if (Math.abs(diffY) > Math.abs(diffX)) {
-      diffY > 0 ? toggle() : toggle();
+      diffY > 0 ? toggle(event) : toggle(event);
     } else {
+      if(event.target.classList[0] === "range"){
+        return;
+      }
       diffX > 0 ? handlePrevious()  : handleNext();
     }
   }
@@ -633,3 +606,6 @@ touchArea.addEventListener("mouseleave", () => {
 window.onload = () => {
   isSwiped = false;
 };
+
+
+//TODO: update $trigger, add purify to single render prop
