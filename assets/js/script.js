@@ -464,11 +464,11 @@ const toggle = (event) => {
 const Header = () => {
   return `
     <div class="top-bar wrapper">
-      <!--Crunchyroll navbar-->
+      <!-- navbar-->
       <div class="logo wrapper">
         <h1 class="title-lg">LovePlay</h1>
       </div>
-      <!--Que music list-->
+      <!--music list-->
       <div class="top-bar-actions">
         <button class="btn-icon" onclick="$trigger(toggle)">
           <span class="material-symbols-rounded">filter_list</span>
