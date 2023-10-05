@@ -212,7 +212,7 @@ body:hover::-webkit-scrollbar-thumb { background-color: var(--surface-variant); 
   position: fixed;
   top: 0;
   left: 0;
-  background-color: var(--background-opacity);
+  /* background-color: var(--background-opacity); */
   min-width: 250px;
   width: 100%;
   height: 64px;
@@ -221,7 +221,7 @@ body:hover::-webkit-scrollbar-thumb { background-color: var(--surface-variant); 
   backdrop-filter: blur(50px);
   box-shadow: var(--shadow-1);
   z-index: 2;
-  color: rgb(247, 99, 0);
+  color: #fff;
   font-style: bold;
 }
 
