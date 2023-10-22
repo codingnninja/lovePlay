@@ -19,15 +19,17 @@ const debounce = (func, timeout=300) => {
 }
 
 const handlePrevious = debounce(() => {
-  let [previousComponent] = $select("#previous");
+  let previousComponent = $select("#previous");
   const previousSongIndex = previousComponent.dataset.index;
-  previous(null, previousSongIndex);
+  const currentSong = $select(`#audio-${previousSongIndex + 1}`);
+  previous(currentSong, previousSongIndex);
 });
 
 const handleNext = debounce (() => {
-  let [nextComponent] = $select("#next");
+  let nextComponent = $select("#next");
   const nextSongIndex = nextComponent.dataset.index;
-  next(null, nextSongIndex);
+  const currentSong = $select(`#audio-${nextSongIndex - 1}`);
+  next(currentSong, nextSongIndex);
 });
 //Initial mouse X and Y positions are 0
 
