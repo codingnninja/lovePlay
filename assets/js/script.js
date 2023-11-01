@@ -370,7 +370,6 @@ const Controller = (song) => {
 }
 
 const unCheckSong = (song) => {
-  console.log(song.checked);
   if(song.checked === false){
     song.checked = false;
     return;
