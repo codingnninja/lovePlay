@@ -12,7 +12,11 @@ const appState = {
   repeat: false,
   shuffle: null,
   selected: false,
-  volume: null
+  volume: null,
+  range: {
+    start: 0,
+    end: null
+  }
 }
 
 const Player = () => {
@@ -53,15 +57,17 @@ const getTimecode = function (duration) {
 }
 
 const updateDuration = (elements) => {
-  playerSeekRange = elements[1];
-  playerDuration = elements[2];
-  playerSeekRange.max = Math.ceil(elements[0].duration);
+  const [audio,  playerSeekRange, endRange, playerDuration ] = elements;
+  playerSeekRange.max = Math.ceil(audio.duration);
+  endRange.max = playerSeekRange.max;
+  endRange.value = playerSeekRange.max;
+  appState.range.end = playerSeekRange.max;
   playerDuration.textContent = getTimecode(Number(playerSeekRange.max));
 }
 
 const CurrentSongInformation = (song) => {
   return `
-    <audio src=${song.musicPath} id="audio-${song.id}" data-id="${song.id}" onEnded="autopilotMode(this, '${stringify(song)}')" onloadeddata="$trigger(${updateDuration}, '#audio-${song.id},#seek-${song.id}, #duration')" class="playing-audio"></audio>
+    <audio src=${song.musicPath} id="audio-${song.id}" data-id="${song.id}" onEnded="autopilotMode(this, '${stringify(song)}')" onloadeddata="$trigger(${updateDuration}, '#audio-${song.id},#seek-${song.id}, #seek-right-${song.id}, #duration')" class="playing-audio"></audio>
     <figure class="music-banner">
     <img
       src="${song.posterUrl}"
@@ -148,6 +154,14 @@ const Volume = (song) => {
 
 const updateRunningTime = (song) => {
   const [playingAudio, playerSeekRange, playerRunningTime, rangeFill] = $select( `#audio-${song.id}, #seek-${song.id}, #running-time, #range-fill`);
+
+  if(Math.floor(playingAudio.currentTime) === appState.range.end){
+    if(!appState.repeat){
+      appState.range.end = playingAudio.duration;
+    }
+    autopilotMode(playingAudio, song);   
+  }
+
   playerSeekRange.value = playingAudio.currentTime;
   playerRunningTime.textContent = getTimecode(playingAudio.currentTime);
   const rangeValue = (playerSeekRange.value / playerSeekRange.max) * 100;
@@ -157,16 +171,40 @@ const updateRunningTime = (song) => {
 const seek = (elements) => {
   const [audio, runningTime, seekRange, rangeFill] = elements;
   audio.currentTime = seekRange.value;
-  runningTime.textContent = getTimecode(seekRange.value);
+
+  appState.range.start = Number(seekRange.value); 
+  runningTime.textContent = getTimecode(appState.range.start);
 
   const rangeValue = (seekRange.value / seekRange.max) * 100;
   rangeFill.style.width = `${rangeValue}%`;
+}
+
+const seekRight = (elements) => {
+  const [duration, seekRangeRight, fillRight] = elements;
+  const rangeValue = (seekRangeRight.value/seekRangeRight.max) * 100;
+  
+  appState.range.end = Number(seekRangeRight.value); 
+  appState.range.elements = elements; 
+  duration.textContent = getTimecode(appState.range.end);
+
+  const rangeRightValue = 100 - rangeValue;
+  fillRight.style.width = `${rangeRightValue}%`;
 }
 
 const ProgressIndicator = (song) => {
   return `
     <div class="progress-indicator" id="progress-indicator">
       <div class="range-wrapper">
+        <input
+          type="range"
+          class="duel-range right-range"
+          min="0"
+          max="60"
+          value="60"
+          step="1"
+          id="seek-right-${song.id}"
+          onchange="$trigger(${seekRight}, '#duration, #seek-right-${song.id}, #fill-right')"
+        />
         <input
           type="range"
           step="1"
@@ -176,8 +214,8 @@ const ProgressIndicator = (song) => {
           id="seek-${song.id}"
           onchange="$trigger(${seek}, '#audio-${song.id},#running-time, #seek-${song.id}, #range-fill')"
         />
-
         <div class="range-fill" id="range-fill"></div>
+        <div class="fill-right" id="fill-right"></div>
       </div>
 
       <div class="duration-label wrapper">
@@ -198,6 +236,7 @@ const playSelectedSong = (element, index) => {
 }
 const getSong = (index) => {
   let nextSong;
+  
   if(appState.shuffle && appState.selected === false){
     nextSong = getRandomSong();
     nextSong.isShuffled = true;
@@ -288,9 +327,9 @@ const Play = (song) => {
 }
 
 //next controller
-const next = (element, nextIndex) => {
+const next = (nextIndex) => {
   appState.selected = false;
-  const nextSong =  getSong(nextIndex, element);
+  const nextSong =  getSong(nextIndex);
   setToPlaying(nextSong);
   $render(Repeat)
 }
@@ -303,7 +342,7 @@ const Next = (song) => {
       <button class="btn-icon">
         <span 
           class="material-symbols-rounded"
-          onclick="$trigger(${next}, '#audio-${song.id}', ${index + 1})"
+          onclick="$trigger(${next}, null, ${index + 1})"
         >skip_next</span>
       </button>
     </div>
@@ -333,13 +372,13 @@ const repeat = () => {
   $render(Repeat);
 }
 const autopilotMode = (audio, song) => {
-  const currentSong = $purify(song);
+  const currentSong = typeof song === 'string' ? $purify(song) : song;
   if(appState.repeat) {
-    audio.currentTime = 0;
+    audio.currentTime = appState.range.start;
     audio.play(); 
-    return; 
+    return true; 
   } 
-  next(audio, currentSong.id);
+  next(currentSong.id);
 }
 
 const Repeat = () => {

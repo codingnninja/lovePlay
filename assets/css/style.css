@@ -289,7 +289,6 @@ body:hover::-webkit-scrollbar-thumb { background-color: var(--surface-variant); 
   appearance: none;
   background-color: var(--surface-variant);
   height: 6px;
-  width: 100%;
   border-radius: var(--radius-pill);
 }
 
@@ -298,6 +297,18 @@ body:hover::-webkit-scrollbar-thumb { background-color: var(--surface-variant); 
   position: absolute;
   top: 0;
   left: 0;
+  width: 0;
+  height: 6px;
+  background-color: var(--primary);
+  border-radius: var(--radius-pill);
+  pointer-events: none;
+}
+
+.fill-right {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
   width: 0;
   height: 6px;
   background-color: var(--primary);
@@ -315,7 +326,7 @@ body:hover::-webkit-scrollbar-thumb { background-color: var(--surface-variant); 
   transition: var(--transition-1);
 }
 
-.range::-webkit-slider-thumb:hover {
+.range::-webkit-slider-thumb:hover, .duel-range::-webkit-slider-thumb:hover {
   box-shadow: 0 0 0 12px var(--on-surface-variant-hover);
 }
 
@@ -695,3 +706,47 @@ body:hover::-webkit-scrollbar-thumb { background-color: var(--surface-variant); 
   .music-list { gap: 28px; }
 
 }
+
+.duel-range {
+  --left-per: 0%;
+  --right-per: 100%;
+
+  position: absolute;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  outline: none;
+  pointer-events: none;
+  z-index: 8;
+}
+
+.duel-range::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  background-color: var(--surface-variant);
+  border: 3px solid var(--primary);
+  width: 20px;
+  height: 20px;
+  margin-block-start: -5px;
+  border-radius: var(--radius-pill);
+  transition: var(--transition-1);
+}
+
+.duel-range::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  margin-top: -8px; /* Centers thumb on the track */
+  background-color: var(--range-thumb-color);
+  height: 24px;
+  width: 24px;
+  pointer-events: all;
+  border-radius: 1rem;
+  outline: 5px solid white;
+  outline-offset: -20px;
+  box-shadow: 0 0 10px var(--range-thumb-color);
+  cursor: pointer;
+}
+      
