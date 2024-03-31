@@ -448,7 +448,7 @@ const Audio = ({song}) => {
         id='playing-${song.id}' 
         onclick="$trigger(${appState.playSelectedSong}, '#audio-${song.id}', ${song.id - 1})">
           <img src="${song.posterUrl}" width="800" height="800" alt="${song.title} Album Poster"
-          class="img-cover">
+          class="img-cover" loading="lazy">
           <div class="item-icon">
             <span class="material-symbols-rounded">equalizer</span>
           </div>
