@@ -499,7 +499,7 @@ const Songs = ({songs}) => {
     </div>`;
 }
 
-const debounce = (func, timeout=300) => {
+const debounce = (func, timeout=50) => {
   let timer;
   return (...args) => {
     clearTimeout(timeout);
@@ -525,7 +525,6 @@ const toggle = (event) => {
 }
 
 const Header = ({toggle}) => {
-  console.log(toggle);
   return `
     <div class="top-bar wrapper">
       <!--navbar-->
@@ -584,6 +583,11 @@ if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigat
     let nextComponent = $select("#next>button>span");
     nextComponent.click();
   });
+
+  const togglePlaylistBySwipingDown = debounce((event) => {
+    event && event.preventDefault();
+    toggle();
+  })
   //Initial mouse X and Y positions are 0
 
   let mouseX,
@@ -653,7 +657,7 @@ if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigat
     let diffX = mouseX - initialX;
     let diffY = mouseY - initialY;
     if (Math.abs(diffY) > Math.abs(diffX)) {
-      diffY > 0 ? event.preventDefault() : event.preventDefault();
+      diffY > 0 ? togglePlaylistBySwipingDown(event) : doNothing();
     } else {
       if(event.target.classList[0] === "range" || event.target.classList[0] === "duel-range"){
         return;
