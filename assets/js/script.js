@@ -653,7 +653,7 @@ if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigat
     let diffX = mouseX - initialX;
     let diffY = mouseY - initialY;
     if (Math.abs(diffY) > Math.abs(diffX)) {
-      diffY > 0 ? doNothing() : doNothing();
+      diffY > 0 ? event.preventDefault() : event.preventDefault();
     } else {
       if(event.target.classList[0] === "range" || event.target.classList[0] === "duel-range"){
         return;
