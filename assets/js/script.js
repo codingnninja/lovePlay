@@ -200,6 +200,7 @@ const CurrentSongInformation = ({song}) => {
       height="800"
       alt="Wotakoi: Love is Hard for an Otaku Album Poster"
       class="img-cover"
+      loading="lazy"
     />
   </figure>
 
