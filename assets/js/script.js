@@ -131,6 +131,7 @@ const autopilotMode = (audio, song) => {
 }
 
 const appState = {
+  played: false,
   songs,
   getSong,
   autopilotMode,
@@ -340,7 +341,7 @@ const Previous = ({song}) => {
     </div>
   `;
 }
-const Play = ({song}) => {
+const Play = ({song, event}) => {
   const audio = $select(`#audio-${song.id}`); 
   const props = {song};
   clearInterval(appState.playingInterval);
@@ -348,6 +349,7 @@ const Play = ({song}) => {
   if(audio){
     song.isPlaying = audio.paused ? true : false; 
     appState.resolveVolume(audio, song);
+    appState.played = true;
     audio.paused ? audio.play() : audio.pause();
     $render(Songs, {songs: appState.setPlayingState(song)})
     if(song.isPlaying){
@@ -566,8 +568,7 @@ const a = await $render(App, {songs, toggle});
 console.log(a);
 
 
-if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
-    
+if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){ 
   // Swiping implementation
   let [touchArea, overlay] = $select("#player, #overlay");
 
@@ -576,109 +577,72 @@ if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigat
   }
 
   const handlePrevious = debounce(() => {
+    if(!appState.played) {
+      alert('You must play before you swipe');
+      return false
+    }
     let previousComponent = $select("#previous>button>span");
     previousComponent.click();
   });
 
   const handleNext = debounce (() => {
+    if(!appState.played) {
+      alert('You must play before you swipe');
+      return false
+    }
     let nextComponent = $select("#next>button>span");
     nextComponent.click();
   });
 
   const togglePlaylistBySwipingDown = debounce((event) => {
-    event && event.preventDefault();
     toggle();
   })
   //Initial mouse X and Y positions are 0
 
-  let mouseX,
-  initialX = 0;
-  let mouseY,
-  initialY = 0;
-  let isSwiped;
+let startX = 0;
+let startY = 0;
+let threshold = 100; // Minimum distance to swipe
 
-  //Events for touch and mouse
-  let events = {
-  mouse: {
-    down: "mousedown",
-    move: "mousemove",
-    up: "mouseup",
-  },
-  touch: {
-    down: "touchstart",
-    move: "touchmove",
-    up: "touchend",
-  },
-  };
+function handleTouchStart(event) {
+    startX = event.touches[0].clientX;
+    startY = event.touches[0].clientY;
+}
 
-  let deviceType = "";
+function handleTouchMove(event) {
 
-  //Detect touch device
+    let currentX = event.touches[0].clientX;
+    let currentY = event.touches[0].clientY;
+    let diffX = startX - currentX;
+    let diffY = startY - currentY;
 
-  const isTouchDevice = () => {
-  try {
-    //We try to create TouchEvent (it would fail for desktops and throw error)
-    document.createEvent("TouchEvent");
-    deviceType = "touch";
-    return true;
-  } catch (e) {
-    deviceType = "mouse";
-    return false;
-  }
-  };
-
-  //Get left and top of touchArea
-  let rectLeft = touchArea.getBoundingClientRect().left;
-  let rectTop = touchArea.getBoundingClientRect().top;
-
-  //Get Exact X and Y position of mouse/touch
-  const getXY = (e) => {
-  mouseX = (!isTouchDevice() ? e.pageX : e.touches[0].pageX) - rectLeft;
-  mouseY = (!isTouchDevice() ? e.pageY : e.touches[0].pageY) - rectTop;
-  };
-
-  isTouchDevice();
-
-  //Start Swipe
-  touchArea.addEventListener(events[deviceType].down, (event) => {
-  isSwiped = true;
-  //Get X and Y Position
-  getXY(event);
-  initialX = mouseX;
-  initialY = mouseY;
-  }, true);
-
-  //Mousemove / touchmove
-  touchArea.addEventListener(events[deviceType].move, (event) => {
-  if (!isTouchDevice()) {
-    event.preventDefault();
-  }
-  if (isSwiped) {
-    getXY(event);
-    let diffX = mouseX - initialX;
-    let diffY = mouseY - initialY;
-    if (Math.abs(diffY) > Math.abs(diffX)) {
-      diffY > 0 ? togglePlaylistBySwipingDown(event) : doNothing();
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+        // Horizontal swipe
+        if (diffX > threshold) {
+            // Swipe left
+            handleNext();
+        } else if (diffX < -threshold) {
+            // Swipe right
+            handlePrevious();
+        }
     } else {
-      if(event.target.classList[0] === "range" || event.target.classList[0] === "duel-range"){
-        return;
-      }
-      diffX > 0 ? handlePrevious() : handleNext();
+        // Vertical swipe
+        if (diffY > threshold) {
+            // Swipe up
+            doNothing();
+        } else if (diffY < -threshold) {
+            // Swipe 
+            togglePlaylistBySwipingDown();
+        }
     }
-  }
-  });
+}
 
-  //Stop Drawing
-  touchArea.addEventListener(events[deviceType].up, () => {
-  isSwiped = false;
-  });
+function handleTouchEnd(event) {
+    // Reset startX and startY
+    startX = 0;
+    startY = 0;
+}
 
-  touchArea.addEventListener("mouseleave", () => {
-  isSwiped = false;
-  });
-
-  window.onload = () => {
-  isSwiped = false;
-  };
-
+touchArea.addEventListener("touchstart", handleTouchStart, {passive: true});
+touchArea.addEventListener("touchmove", handleTouchMove, {passive: true});
+touchArea.addEventListener("touchend", handleTouchEnd, {passive: true});
 }
