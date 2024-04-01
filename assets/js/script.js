@@ -614,6 +614,11 @@ function handleTouchMove(event) {
 
     if (Math.abs(diffX) > Math.abs(diffY)) {
         // Horizontal swipe
+        if(event.target.classList[0] === "range" || event.target.classList[0] === "duel-range"){
+          return false;
+        }
+
+
         if (diffX > threshold) {
             // Swipe left
             handleNext();
