@@ -7,7 +7,6 @@ let playingInterval;
 const songs = [
     {
       id:1,
-      backgroundImage: "./assets/images/background.jpg",
       posterUrl: "./assets/images/calm-down.png",
       title: "Calm Down",
       album: "Audio",
@@ -17,7 +16,6 @@ const songs = [
     },
     {
       id:2,
-      backgroundImage: "./assets/images/background.jpg",
       posterUrl: "./assets/images/lonely-at-the-top.jpg",
       title: "Lonely at the top ",
       album: "Audio",
@@ -27,7 +25,6 @@ const songs = [
     },
     {
       id:3,
-      backgroundImage: "./assets/images/local-poster-3.jpg",
       posterUrl: "./assets/images/unavailable.jpg",
       title: "Unavailable",
       album: "Audio",
