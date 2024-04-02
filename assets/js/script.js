@@ -198,7 +198,6 @@ const CurrentSongInformation = ({song}) => {
       height="800"
       alt="Wotakoi: Love is Hard for an Otaku Album Poster"
       class="img-cover"
-      loading="lazy"
     />
   </figure>
 
@@ -445,7 +444,7 @@ const Audio = ({song}) => {
         id='playing-${song.id}' 
         onclick="$trigger(${appState.playSelectedSong}, '#audio-${song.id}', ${song.id - 1})">
           <img src="${song.posterUrl}" width="800" height="800" alt="${song.title} Album Poster"
-          class="img-cover" loading="lazy">
+          class="img-cover">
           <div class="item-icon">
             <span class="material-symbols-rounded">equalizer</span>
           </div>
